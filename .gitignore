@@ -1,0 +1,21 @@
+# --- Personal data: never commit ---
+references/saved_places.json
+references/*.snapshot.json
+references/known_ids.md
+
+# Raw Takeout exports / working dirs
+*.zip
+Takeout/
+work/
+/tmp/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
