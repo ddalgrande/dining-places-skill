@@ -92,10 +92,15 @@ for dining recommendations and provide my Google Takeout export.
 
 Your only steps are one-time setup; the agent does the parsing and enrichment.
 
-1. In [Takeout](https://takeout.google.com/), export **Saved** + **Maps**
-   (optionally schedule a recurring export every ~2 months).
-2. Make the `.zip` reachable: connect **Google Drive** and drop it in
-   `My Drive/Takeout`, **or** upload the zip directly in chat.
+1. In [Takeout](https://takeout.google.com/), **deselect everything, then tick
+   both `Maps (your places)` *and* `Saved`** — you need both: `Maps (your places)`
+   holds your starred places (with coordinates), `Saved` holds your Lists (*Want
+   to go*, *To visit*, *Favourites*, custom). Miss one and you lose either the
+   coordinates or the Lists. Set delivery to **Add to Drive** (optionally schedule
+   a recurring export every ~2 months).
+2. Make the `.zip` reachable: **enable the Google Drive connector** in your agent
+   so it can read the export from `My Drive/Takeout` — **or** upload the zip
+   directly in chat.
 3. Ask naturally — e.g. *"where should I eat near the Heath tonight, from my saved
    places?"* or *"somewhere for drinks around here."*
 
