@@ -27,6 +27,20 @@ Both are parsed and merged. Note the consequence: a *location* search only works
 on rows that have coordinates, so List-only places must be enriched (via a Places
 lookup) before they can be filtered by neighbourhood. See `SKILL.md`.
 
+## Prepare your data (do this first)
+
+A Takeout export can take a while to generate, so kick it off before you install
+the skill.
+
+1. In [Takeout](https://takeout.google.com/), **deselect everything, then tick
+   both `Maps (your places)` *and* `Saved`** — you need both: `Maps (your places)`
+   holds your starred places (with coordinates), `Saved` holds your Lists (*Want
+   to go*, *To visit*, *Favourites*, custom). Miss one and you lose either the
+   coordinates or the Lists. Set delivery to **Add to Drive** (optionally schedule
+   a recurring export every ~2 months).
+2. **Enable the Google Drive connector** in your agent so it can read the export
+   from `My Drive/Takeout` — **or** plan to upload the zip directly in chat.
+
 ## Install
 
 ### Method 1 — Ask Claude to install it (Claude Code & other shell-capable agents)
@@ -90,19 +104,10 @@ for dining recommendations and provide my Google Takeout export.
 
 ## Use it (nothing to run by hand)
 
-Your only steps are one-time setup; the agent does the parsing and enrichment.
-
-1. In [Takeout](https://takeout.google.com/), **deselect everything, then tick
-   both `Maps (your places)` *and* `Saved`** — you need both: `Maps (your places)`
-   holds your starred places (with coordinates), `Saved` holds your Lists (*Want
-   to go*, *To visit*, *Favourites*, custom). Miss one and you lose either the
-   coordinates or the Lists. Set delivery to **Add to Drive** (optionally schedule
-   a recurring export every ~2 months).
-2. Make the `.zip` reachable: **enable the Google Drive connector** in your agent
-   so it can read the export from `My Drive/Takeout` — **or** upload the zip
-   directly in chat.
-3. Ask naturally — e.g. *"where should I eat near the Heath tonight, from my saved
-   places?"* or *"somewhere for drinks around here."*
+With your export in Drive (or to hand) and the skill installed, just ask
+naturally — e.g. *"where should I eat near the Heath tonight, from my saved
+places?"* or *"somewhere for drinks around here."* The agent does the parsing
+and enrichment.
 
 Behind the scenes the agent then: reads the export → runs
 `scripts/parse_takeout_maps.py` to build `references/saved_places.json` → matches
