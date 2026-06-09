@@ -1,7 +1,6 @@
 # dining-places-skill
 
-An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (the skill itself is named
-`dining-places`) that turns your **Google Maps saved places** into a personal
+An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that turns your **Google Maps saved places** into a personal
 dining knowledge base, then gives eating-out advice that:
 
 1. **surfaces places you already saved** (⭐ Saved),
@@ -32,10 +31,8 @@ lookup) before they can be filtered by neighbourhood. See `SKILL.md`.
 
 ### Method 1 — Ask Claude to install it (Claude Code & other shell-capable agents)
 
-Paste this prompt (swap `<you>` for your GitHub username). Works in any agent that
-can run `git` and read files — Claude Code, Codex CLI, Cursor, etc. It does **not**
-work in the claude.ai chat UI, where skills are installed via Settings — see the
-claude.ai steps under Method 2 below.
+Paste this prompt. Works in any agent that can run `git` and read files: Claude Code, Codex CLI, Cursor, etc. It does **not**
+work in the claude.ai chat UI, where skills are installed via Settings. See theclaude.ai steps under Method 2 below.
 
 ```text
 Install the `dining-places` Agent Skill from GitHub for me:
@@ -110,7 +107,7 @@ your saved places to the area → enriches + widens → replies with a **map**, 
 ## How your saved places get used (the clever bit)
 
 Takeout gives your **starred** places coordinates, but your **List** places
-(*Want to go*, *To visit*, *Favourites*, custom lists) have none — so a naive
+(*Want to go*, *To visit*, *Favourites*, custom lists) have none, so a naive
 location search silently skips them. `SKILL.md` Step 3 fixes that without any API
 key:
 
