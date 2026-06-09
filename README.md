@@ -1,6 +1,6 @@
 # dining-places-skill
 
-An [Agent Skill](https://docs.claude.com) (the skill itself is named
+An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) (the skill itself is named
 `dining-places`) that turns your **Google Maps saved places** into a personal
 dining knowledge base, then gives eating-out advice that:
 
