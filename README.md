@@ -40,10 +40,13 @@ claude.ai steps under Method 2 below.
 ```text
 Install the `dining-places` Agent Skill from GitHub for me:
 
-1. Clone https://github.com/ddalgrande/dining-places-skill into
-   ~/.claude/skills/dining-places  (use .claude/skills/dining-places instead if
-   we're working inside a project). If that folder already exists, git pull
-   the latest rather than re-cloning.
+1. Clone https://github.com/ddalgrande/dining-places-skill into your agent's
+   skills folder as dining-places:
+     - Claude Code: ~/.claude/skills/dining-places (or .claude/skills/dining-places
+       project-scoped)
+     - Codex: ~/.codex/skills/dining-places (or .agents/skills/dining-places
+       project-scoped)
+   If that folder already exists, git pull the latest rather than re-cloning.
 2. Before trusting anything, open SKILL.md and every file under scripts/ and
    give me a short summary of what they do — explicitly flag anything that
    reaches the network, writes outside the skill folder, or touches my
@@ -84,9 +87,9 @@ for dining recommendations and provide my Google Takeout export.
 
 **Codex / other SKILL.md-standard agents (Cursor, Gemini CLI, …)**
 - `SKILL.md` follows the open Agent Skills standard, so place the `dining-places/`
-  folder wherever your agent discovers skills (its skills directory, or alongside
-  an `AGENTS.md`). Native auto-discovery varies by tool — check your agent's docs
-  for its skills path.
+  folder wherever your agent discovers skills. Codex reads `~/.codex/skills/`
+  (user) and `.agents/skills/` (per-repo, scanned from the working dir up to the
+  repo root); other tools vary — check your agent's docs for its skills path.
 
 ## Use it (nothing to run by hand)
 
