@@ -113,8 +113,9 @@ plainly and lean on Step 4.
 > **Optional one-time backfill:** if you want every List place searchable
 > immediately rather than lazily, run a build-time geocoding pass over all
 > coord-less rows (requires a Maps/Places API key) and write the coordinates into
-> the snapshot. The lazy approach above needs no key and converges to the same
-> place.
+> the snapshot. If you create a key, restrict it: API restriction = Geocoding API
+> (+ Places API if resolving by name), application restriction = None or your IP.
+> The lazy approach above needs no key and converges to the same place.
 
 ### Step 4 — Enrich + supplement (saved-first, then widen, taste-calibrated)
 1. **Surface saved matches first**, enriched with current detail via the Places
