@@ -83,8 +83,8 @@ Takeout GeoJSON schemas.
 Point the parser at the folder of zips (it extracts each internally and merges
 them; no manual unzip, no `Saved/` folder required):
 ```bash
-python scripts/parse_takeout_maps.py <folder> --out references/saved_places.json --dedupe
-# or a single archive:  python scripts/parse_takeout_maps.py <archive>.zip
+python3 scripts/parse_takeout_maps.py <folder> --out references/saved_places.json --dedupe
+# or a single archive:  python3 scripts/parse_takeout_maps.py <archive>.zip
 ```
 This merges every List CSV + the saved-places GeoJSON into one normalized list:
 `name, source_list, note, address, lat, lng, maps_url`. Cache the result.

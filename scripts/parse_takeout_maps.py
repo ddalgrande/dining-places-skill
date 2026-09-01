@@ -13,7 +13,7 @@ present. Cuisine / rating / opening hours are NOT in Takeout — enrich those
 at advice-time with the places_search tool.
 
 Usage:
-    python parse_takeout_maps.py <folder> [--out saved_places.json] [--dedupe]
+    python3 parse_takeout_maps.py <folder> [--out saved_places.json] [--dedupe]
 
 <folder> = path to the extracted Takeout export, or any folder that
 contains the .csv / .json export files (it searches recursively).
