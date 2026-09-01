@@ -10,7 +10,8 @@ dining knowledge base, then gives eating-out advice that:
 …then plots everything on a **map**, summarises it in a **comparison table**, and
 gives a **booking link** per place.
 
-It works at home and while travelling.
+It works at home and while travelling, with any coding agent — Claude Code,
+Codex, Cursor, Gemini CLI, Kimi, GLM-based agents, pi. See [`AGENTS.md`](AGENTS.md).
 
 ## Why Takeout?
 
@@ -43,10 +44,12 @@ the skill.
 
 ## Install
 
-### Method 1 — Ask Claude to install it (Claude Code & other shell-capable agents)
+### Method 1 — Ask your agent to install it (any shell-capable coding agent)
 
-Paste this prompt. Works in any agent that can run `git` and read files: Claude Code, Codex CLI, Cursor, etc. It does **not**
-work in the claude.ai chat UI, where skills are installed via Settings. See theclaude.ai steps under Method 2 below.
+Paste this prompt. Works in any agent that can run `git` and read files — Claude
+Code, Codex CLI, Cursor, Gemini CLI, Kimi, GLM-based agents, pi, and so on. It
+does **not** work in the claude.ai chat UI, where skills are installed via
+Settings. See the claude.ai steps under Method 2 below.
 
 ```text
 Install the `dining-places` Agent Skill from GitHub for me:
@@ -57,6 +60,8 @@ Install the `dining-places` Agent Skill from GitHub for me:
        project-scoped)
      - Codex: ~/.codex/skills/dining-places (or .agents/skills/dining-places
        project-scoped)
+     - Any other agent: wherever it discovers skills; if it has no skills
+       folder, clone anywhere and read AGENTS.md.
    If that folder already exists, git pull the latest rather than re-cloning.
 2. Before trusting anything, open SKILL.md and every file under scripts/ and
    give me a short summary of what they do — explicitly flag anything that
@@ -101,6 +106,12 @@ for dining recommendations and provide my Google Takeout export.
   folder wherever your agent discovers skills. Codex reads `~/.codex/skills/`
   (user) and `.agents/skills/` (per-repo, scanned from the working dir up to the
   repo root); other tools vary — check your agent's docs for its skills path.
+
+**Agents with no skills system (Kimi, GLM-based agents, pi, generic assistants)**
+- Clone the repo anywhere the agent can read it and point the agent at
+  **`AGENTS.md`** (mirrored as `CLAUDE.md`). It tells the agent to treat
+  `SKILL.md` as a standing instruction set and follow that workflow whenever you
+  ask where to eat or drink. Nothing else to configure.
 
 ## Use it (nothing to run by hand)
 
