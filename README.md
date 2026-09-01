@@ -11,7 +11,8 @@ dining knowledge base, then gives eating-out advice that:
 gives a **booking link** per place.
 
 It works at home and while travelling, with any coding agent — Claude Code,
-Codex, Cursor, Gemini CLI, Kimi, GLM-based agents, pi. See [`AGENTS.md`](AGENTS.md).
+Codex, Cursor, Gemini CLI, Kimi, GLM-based agents, or pi. See
+[`AGENTS.md`](AGENTS.md).
 
 ## Why Takeout?
 
