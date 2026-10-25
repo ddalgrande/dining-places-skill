@@ -6,7 +6,11 @@
     "address": "1 Example St, Exampleton EX1 2YZ",
     "lat": 51.5000,
     "lng": -0.1000,
-    "maps_url": "https://maps.google.com/?cid=0000000000000000000"
+    "maps_url": "https://maps.google.com/?cid=0000000000000000000",
+    "source_lists": [
+      "Saved Places",
+      "Starred places"
+    ]
   },
   {
     "name": "Example Wine Bar",
@@ -15,6 +19,9 @@
     "address": "",
     "lat": null,
     "lng": null,
-    "maps_url": "https://maps.app.goo.gl/example"
+    "maps_url": "https://maps.app.goo.gl/example",
+    "source_lists": [
+      "Want to go"
+    ]
   }
 ]

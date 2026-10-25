@@ -87,7 +87,9 @@ python3 scripts/parse_takeout_maps.py <folder> --out references/saved_places.jso
 # or a single archive:  python3 scripts/parse_takeout_maps.py <archive>.zip
 ```
 This merges every List CSV + the saved-places GeoJSON into one normalized list:
-`name, source_list, note, address, lat, lng, maps_url`. Cache the result.
+`name, source_list, note, address, lat, lng, maps_url, source_lists`. Cache the result.
+`source_lists` holds every list the venue is saved in (e.g. both *Starred places*
+and *Want to go*); use it, not `source_list`, for list-membership questions.
 
 ### Step 3 — Match the request to saved places (use BOTH sources)
 Filter the knowledge base by the location in the request (home neighbourhood, or
@@ -175,4 +177,4 @@ Adapt the body to the ask:
 |---|---|
 | `folder` (positional) | A Takeout `.zip`, a folder of zips, or an extracted folder; searched recursively, zips auto-extracted |
 | `--out PATH` | Write normalized JSON (else stdout); prints a per-list count summary |
-| `--dedupe` | Drop duplicate place names (keep first) |
+| `--dedupe` | Merge records of the same venue — same Google place ID, same maps URL, or same name within 50 m. Keeps every list in `source_lists`, the first coordinates/address found, and all distinct notes. Same-name venues in different places stay separate. |

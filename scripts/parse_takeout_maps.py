@@ -21,6 +21,7 @@ contains the .csv / .json export files (it searches recursively).
 import argparse
 import csv
 import json
+import math
 import re
 import sys
 import tempfile
@@ -32,6 +33,15 @@ _RE_3D4D = re.compile(r"!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)")
 _RE_AT = re.compile(r"@(-?\d+\.\d+),(-?\d+\.\d+)")
 
 
+# Google place identity: `?cid=<decimal>` (GeoJSON) or a feature id
+# `0x<hex>:0x<cid-hex>` (Saved CSV URLs). Both reduce to the same CID.
+_RE_CID = re.compile(r"[?&]cid=(\d+)")
+_RE_FTID = re.compile(r"(?:!1s|ftid=)0x[0-9a-fA-F]+:0x([0-9a-fA-F]+)")
+
+# Same-name records closer than this are treated as one venue.
+_SAME_VENUE_METRES = 50
+
+
 def coords_from_url(url: str):
     if not url:
         return None, None
@@ -39,6 +49,92 @@ def coords_from_url(url: str):
     if m:
         return float(m.group(1)), float(m.group(2))
     return None, None
+
+
+def cid_from_url(url: str):
+    if not url:
+        return None
+    m = _RE_CID.search(url)
+    if m:
+        return int(m.group(1))
+    m = _RE_FTID.search(url)
+    if m and int(m.group(1), 16):
+        return int(m.group(1), 16)
+    return None
+
+
+def _metres_apart(a, b):
+    dlat = (a["lat"] - b["lat"]) * 111_320
+    dlng = (a["lng"] - b["lng"]) * 111_320 * math.cos(math.radians(a["lat"]))
+    return math.hypot(dlat, dlng)
+
+
+def merge_duplicates(places):
+    """Merge records that are the same venue, keeping every list membership.
+
+    Two records are the same venue when they share a Google place CID, the
+    exact same maps URL, or the same name within _SAME_VENUE_METRES. A name
+    match alone is never enough: different venues can share a name.
+    """
+    parent = list(range(len(places)))
+    # A group holds at most one CID; distinct CIDs prove distinct venues.
+    group_cid = [cid_from_url(p["maps_url"]) for p in places]
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]
+            i = parent[i]
+        return i
+
+    def union(i, j):
+        ri, rj = find(i), find(j)
+        if ri == rj:
+            return
+        lo, hi = min(ri, rj), max(ri, rj)
+        parent[hi] = lo
+        group_cid[lo] = group_cid[lo] or group_cid[hi]
+
+    def cids_conflict(i, j):
+        ci, cj = group_cid[find(i)], group_cid[find(j)]
+        return bool(ci and cj and ci != cj)
+
+    first_by_key = {}
+    by_name = {}
+    for i, p in enumerate(places):
+        cid = group_cid[i]
+        keys = ([("cid", cid)] if cid else []) + (
+            [("url", p["maps_url"].strip())] if p["maps_url"].strip() else [])
+        for k in keys:
+            if k in first_by_key:
+                union(first_by_key[k], i)
+            else:
+                first_by_key[k] = i
+        if p["lat"] is not None and p["lng"] is not None:
+            by_name.setdefault(p["name"].strip().lower(), []).append(i)
+    for idxs in by_name.values():
+        for a, i in enumerate(idxs):
+            for j in idxs[a + 1:]:
+                if (_metres_apart(places[i], places[j]) <= _SAME_VENUE_METRES
+                        and not cids_conflict(i, j)):
+                    union(i, j)
+
+    groups = {}
+    for i in range(len(places)):
+        groups.setdefault(find(i), []).append(places[i])
+    merged = []
+    for recs in groups.values():  # dict order == first-seen order
+        m = dict(recs[0])
+        m["source_lists"] = list(dict.fromkeys(r["source_list"] for r in recs))
+        m["note"] = " | ".join(dict.fromkeys(r["note"] for r in recs if r["note"]))
+        m["address"] = next((r["address"] for r in recs if r["address"]), "")
+        # GeoJSON coords (they come with an address) beat URL viewport coords.
+        with_coords = (next((r for r in recs if r["lat"] is not None and r["address"]), None)
+                       or next((r for r in recs if r["lat"] is not None), None))
+        if with_coords:
+            m["lat"], m["lng"] = with_coords["lat"], with_coords["lng"]
+        m["maps_url"] = next((r["maps_url"] for r in recs if r["maps_url"]), "")
+        merged.append(m)
+    return merged
 
 
 def parse_csv(path: Path):
@@ -94,6 +190,8 @@ def parse_geojson(path: Path):
         geom = ft.get("geometry", {}) or {}
         coords = (geom.get("coordinates") or [None, None]) + [None, None]
         lng, lat = coords[0], coords[1]
+        if lat == 0 and lng == 0:  # Takeout's "no location available" placeholder
+            lat = lng = None
         # Support both the current (lowercase) and legacy (Title-case) schemas
         loc = props.get("location") or props.get("Location") or {}
         name = (props.get("Title") or props.get("name")
@@ -152,7 +250,8 @@ def main():
                          "or an already-extracted folder (searched recursively)")
     ap.add_argument("--out", help="Write normalized JSON here (default: stdout)")
     ap.add_argument("--dedupe", action="store_true",
-                    help="Drop duplicate place names, keeping the first seen")
+                    help="Merge records of the same venue (same place ID, URL, or "
+                         "name within 50 m); keeps every source list")
     args = ap.parse_args()
 
     root = Path(args.folder)
@@ -169,22 +268,20 @@ def main():
                                  + list(sr.rglob("*aved*laces*.json")))):
                 places += parse_geojson(js)
 
+    for p in places:
+        p["source_lists"] = [p["source_list"]]
     if args.dedupe:
-        seen, uniq = set(), []
-        for p in places:
-            key = p["name"].strip().lower()
-            if key in seen:
-                continue
-            seen.add(key)
-            uniq.append(p)
-        places = uniq
+        before = len(places)
+        places = merge_duplicates(places)
+        print(f"  merged {before} records into {len(places)} places", file=sys.stderr)
 
     blob = json.dumps(places, ensure_ascii=False, indent=2)
     if args.out:
         Path(args.out).write_text(blob, encoding="utf-8")
         by_list: dict[str, int] = {}
         for p in places:
-            by_list[p["source_list"]] = by_list.get(p["source_list"], 0) + 1
+            for lst in p["source_lists"]:
+                by_list[lst] = by_list.get(lst, 0) + 1
         print(f"Parsed {len(places)} places across {len(by_list)} lists -> {args.out}")
         for k, v in sorted(by_list.items(), key=lambda x: -x[1]):
             print(f"  {v:4d}  {k}")
