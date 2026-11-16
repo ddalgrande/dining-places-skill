@@ -1,5 +1,7 @@
 # dining-places-skill
 
+[![skills.sh](https://skills.sh/b/ddalgrande/dining-places-skill)](https://skills.sh/ddalgrande/dining-places-skill)
+
 An [Agent Skill](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) that turns your **Google Maps saved places** into a personal
 dining knowledge base, then gives eating-out advice that:
 
@@ -45,25 +47,79 @@ the skill.
 
 ## Install
 
-### Method 1 — Ask your agent to install it (any shell-capable coding agent)
+### Method 1 — skills.sh CLI (recommended)
 
-Paste this prompt. Works in any agent that can run `git` and read files — Claude
-Code, Codex CLI, Cursor, Gemini CLI, Kimi, GLM-based agents, pi, and so on. It
-does **not** work in the claude.ai chat UI, where skills are installed via
-Settings. See the claude.ai steps under Method 2 below.
+The skill is published for the [skills.sh](https://skills.sh) open agent skills
+ecosystem, so one command installs it into Claude Code, Codex, Cursor, Gemini
+CLI, OpenCode, Kimi Code CLI, pi and [many more agents](https://skills.sh). Needs
+Node.js 22.20+.
+
+```bash
+# Preview what will be installed (installs nothing)
+npx skills add ddalgrande/dining-places-skill --list
+
+# Install for every project (recommended — it's a personal skill)
+npx skills add ddalgrande/dining-places-skill -g
+
+# …or only for the current project, for specific agents, non-interactively
+npx skills add ddalgrande/dining-places-skill -a claude-code -a codex -y
+```
+
+The CLI detects your agents and installs the skill as **`dining-places`**
+(from `name:` in `SKILL.md`) into each agent's skills folder, e.g.:
+
+| Agent | Project (default) | Global (`-g`) |
+|---|---|---|
+| Claude Code | `.claude/skills/dining-places/` | `~/.claude/skills/dining-places/` |
+| Codex, Kimi Code CLI, pi | `.agents/skills/dining-places/` | `~/.agents/skills/dining-places/` |
+| Cursor | `.agents/skills/dining-places/` | `~/.cursor/skills/dining-places/` |
+| Gemini CLI | `.agents/skills/dining-places/` | `~/.gemini/skills/dining-places/` |
+| OpenCode | `.agents/skills/dining-places/` | `~/.config/opencode/skills/dining-places/` |
+
+Keep it current or remove it later (drop `-g` if you installed per project):
+
+```bash
+npx skills check                    # any updates available?
+npx skills update dining-places -g  # pull the latest — back up your data first (below)
+npx skills remove dining-places -g
+```
+
+> **Your data survives updates.** `skills update` replaces the installed
+> `dining-places/` folder, so the skill keeps your knowledge base outside it, in
+> `~/.dining-places/` (override with `DINING_PLACES_HOME`). If an older install
+> left `saved_places.json` or `known_ids.md` under the skill's `references/`
+> folder, the agent copies them to `~/.dining-places/` on first use. Run the
+> update after that has happened.
+
+Then restart your agent (in Claude Code, run `/skills` to confirm it loaded).
+
+> **Audit before you trust it.** skills.sh is a directory, not a security review.
+> Read `SKILL.md` and `scripts/` first (the `--list` preview above, or on GitHub).
+> The parser is standard-library Python with no network access.
+>
+> The CLI sends anonymous usage telemetry; set `DISABLE_TELEMETRY=1` to opt out.
+
+### Method 2 — Ask your agent to install it (no Node.js)
+
+Paste this prompt into any agent that can run `git` and read files. It does
+**not** work in the claude.ai chat UI, where skills are installed via Settings
+(see Method 3).
 
 ```text
 Install the `dining-places` Agent Skill from GitHub for me:
 
-1. Clone https://github.com/ddalgrande/dining-places-skill into your agent's
-   skills folder as dining-places:
+1. If Node.js 22.20+ is available, run:
+     npx skills add ddalgrande/dining-places-skill -g
+   Otherwise clone https://github.com/ddalgrande/dining-places-skill into your
+   agent's skills folder as dining-places:
      - Claude Code: ~/.claude/skills/dining-places (or .claude/skills/dining-places
        project-scoped)
-     - Codex: ~/.codex/skills/dining-places (or .agents/skills/dining-places
+     - Codex: ~/.agents/skills/dining-places (or .agents/skills/dining-places
        project-scoped)
      - Any other agent: wherever it discovers skills; if it has no skills
        folder, clone anywhere and read AGENTS.md.
-   If that folder already exists, git pull the latest rather than re-cloning.
+   If that folder already exists, update it (npx skills update dining-places,
+   or git pull) rather than reinstalling.
 2. Before trusting anything, open SKILL.md and every file under scripts/ and
    give me a short summary of what they do — explicitly flag anything that
    reaches the network, writes outside the skill folder, or touches my
@@ -71,13 +127,13 @@ Install the `dining-places` Agent Skill from GitHub for me:
 3. Verify a valid SKILL.md (with `name:` and `description:` frontmatter) sits at
    the root of the destination folder, and that the folder name matches the
    `name:` field (it should be `dining-places`).
-4. Tell me to restart Claude Code and run /skills to confirm it loaded.
+4. Tell me to restart my agent (in Claude Code, run /skills) to confirm it loaded.
 
 Do not run the skill's parser during install — it only runs later, when I ask
 for dining recommendations and provide my Google Takeout export.
 ```
 
-### Method 2 — Manual install
+### Method 3 — Manual install
 
 **Claude (claude.ai / desktop / mobile)**
 1. Zip the `dining-places/` folder.
@@ -87,28 +143,17 @@ for dining recommendations and provide my Google Takeout export.
    Requires a paid plan (Pro/Max/Team/Enterprise) with **code execution** enabled.
    Custom Skills are per-user and don't sync across surfaces.
 
-**Claude Code**
-- Clone (or copy) into `~/.claude/skills/dining-places/` (personal) or
-  `.claude/skills/dining-places/` (project-scoped) — filesystem-based, no upload:
+**Claude Code / Codex / other SKILL.md-standard agents (git clone)**
 
-  ```bash
-  git clone https://github.com/<you>/dining-places-skill ~/.claude/skills/dining-places
-  ```
+```bash
+git clone https://github.com/ddalgrande/dining-places-skill ~/.claude/skills/dining-places
+```
 
-  The destination folder must be **`dining-places`** (matching `name:` in
-  `SKILL.md`), even though the repo is `dining-places-skill`. Confirm a valid
-  `SKILL.md` sits at the folder root, restart Claude Code, then run `/skills` to
-  verify it loaded.
-- **Audit the code before you run it.** Skills installed from GitHub are not
-  security-scanned — read `SKILL.md` and `scripts/` first.
+The destination folder must be **`dining-places`** (matching `name:` in
+`SKILL.md`), even though the repo is `dining-places-skill`. Use the paths in the
+table above for other agents, or check your agent's docs for its skills path.
 
-**Codex / other SKILL.md-standard agents (Cursor, Gemini CLI, …)**
-- `SKILL.md` follows the open Agent Skills standard, so place the `dining-places/`
-  folder wherever your agent discovers skills. Codex reads `~/.codex/skills/`
-  (user) and `.agents/skills/` (per-repo, scanned from the working dir up to the
-  repo root); other tools vary — check your agent's docs for its skills path.
-
-**Agents with no skills system (Kimi, GLM-based agents, pi, generic assistants)**
+**Agents with no skills system (generic assistants, GLM-based agents, …)**
 - Clone the repo anywhere the agent can read it and point the agent at
   **`AGENTS.md`** (mirrored as `CLAUDE.md`). It tells the agent to treat
   `SKILL.md` as a standing instruction set and follow that workflow whenever you
@@ -122,7 +167,7 @@ places?"* or *"somewhere for drinks around here."* The agent does the parsing
 and enrichment.
 
 Behind the scenes the agent then: reads the export → runs
-`scripts/parse_takeout_maps.py` to build `references/saved_places.json` → matches
+`scripts/parse_takeout_maps.py` to build `~/.dining-places/saved_places.json` → matches
 your saved places to the area → enriches + widens → replies with a **map**, a
 **comparison table**, and a **booking link** per place.
 
@@ -149,8 +194,10 @@ gets **cheaper every time you use it**.
 
 ## Privacy
 
-This repo ships **no personal data**. Your generated `references/saved_places.json`
-and your real `references/known_ids.md` are **git-ignored** — do not commit them.
+This repo ships **no personal data**. Your generated `saved_places.json` and
+`known_ids.md` live in `~/.dining-places/`, outside the repo and the installed
+skill folder. Don't copy them into the repo; the legacy `references/` paths stay
+git-ignored as a safety net.
 They contain your saved restaurants and (potentially) home-adjacent locations.
 The `*.example` files show the shape with dummy data.
 

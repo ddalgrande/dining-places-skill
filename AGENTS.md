@@ -13,9 +13,12 @@ reading `SKILL.md` and following it. The `name:` / `description:` frontmatter in
 ## How to use it, by agent capability
 
 - **Your agent supports skills** (Claude Code, Codex, Cursor, Gemini CLI, …):
-  install the skill folder where your agent discovers skills. See `README.md`
-  → *Install*. After that, nothing is invoked by hand — the agent loads
-  `SKILL.md` automatically when the user asks about eating out.
+  install with the [skills.sh](https://skills.sh) CLI —
+  `npx skills add ddalgrande/dining-places-skill -g` — which places the
+  `dining-places` folder where each detected agent discovers skills (or clone it
+  there by hand; see `README.md` → *Install*). After that, nothing is invoked by
+  hand — the agent loads `SKILL.md` automatically when the user asks about
+  eating out.
 
 - **Your agent has no skills mechanism** (Kimi CLI, many Claude Code-compatible
   clients, plain chat assistants): treat `SKILL.md` as a standing instruction
@@ -26,8 +29,12 @@ reading `SKILL.md` and following it. The `name:` / `description:` frontmatter in
 ## The one command
 
 ```bash
-python3 scripts/parse_takeout_maps.py <folder> --out references/saved_places.json --dedupe
+python3 scripts/parse_takeout_maps.py <folder> --out ~/.dining-places/saved_places.json --dedupe
 ```
+
+Personal data lives in `$DINING_PLACES_HOME` (default `~/.dining-places/`),
+**outside the skill folder**, so updating or reinstalling the skill never wipes
+it. See `SKILL.md` → *Where the knowledge base lives*.
 
 `<folder>` is a Takeout `.zip`, a folder of zips, or an extracted folder. The
 script is Python 3.9+, standard library only — no third-party packages, no
@@ -37,9 +44,10 @@ this repo.
 
 ## Ground rules
 
-- **Never commit personal data.** `references/saved_places.json` and
-  `references/known_ids.md` are git-ignored. The `*.example` files show the
-  shape with dummy data.
+- **Never commit personal data, and never write it into the skill folder.**
+  `saved_places.json` and `known_ids.md` belong in `~/.dining-places/`. The
+  legacy `references/` copies stay git-ignored. The `references/*.example` files
+  show the shape with dummy data.
 - **Don't run the parser during install.** It runs only when the user asks for a
   recommendation and has provided their Takeout export.
 - **Booking is side-effecting.** Confirm place / date / party size with the user

@@ -70,20 +70,44 @@ Takeout GeoJSON schemas.
 
 ## Step-by-step workflow
 
+### Where the knowledge base lives (read first)
+
+Personal data lives **outside the skill folder**, in the data directory
+`$DINING_PLACES_HOME` (default **`~/.dining-places/`**), so reinstalling or
+updating the skill (e.g. `npx skills update`, which replaces the skill folder)
+never deletes it:
+
+| File | Path |
+|---|---|
+| Normalized snapshot | `$DINING_PLACES_HOME/saved_places.json` |
+| Drive folder-id cache | `$DINING_PLACES_HOME/known_ids.md` |
+
+Below, `DATA` means that directory: `DATA="${DINING_PLACES_HOME:-$HOME/.dining-places}"`.
+Never write personal data into the skill folder.
+
+**One-time migration:** if `DATA/saved_places.json` (or `known_ids.md`) is
+missing but an older install left one at `references/saved_places.json` (or
+`references/known_ids.md`) inside the skill folder, copy it to `DATA` and use
+that copy from then on.
+
+If the home directory isn't writable or doesn't persist (some hosted sandboxes),
+use any writable path for `DATA` and tell the user the snapshot won't survive the
+session.
+
 ### Step 1 — Get the latest export (zips in Drive)
 1. List the `My Drive/Takeout` folder, newest first, and read each file id.
    (Newly-delivered files can lag in search; if a zip is missing, ask the user
    for its share link and read the id from `…/file/d/<id>/view`.)
 2. Download **every** zip from the newest export (there may be `-001`, `-002`, …)
    and write each to a working folder. Keep them together.
-3. If a cached `references/saved_places.json` snapshot exists and no newer export
+3. If a cached `DATA/saved_places.json` snapshot exists and no newer export
    is present, use the snapshot (fast path).
 
 ### Step 2 — Parse into the knowledge base
 Point the parser at the folder of zips (it extracts each internally and merges
 them; no manual unzip, no `Saved/` folder required):
 ```bash
-python3 scripts/parse_takeout_maps.py <folder> --out references/saved_places.json --dedupe
+python3 scripts/parse_takeout_maps.py <folder> --out "$DATA/saved_places.json" --dedupe
 # or a single archive:  python3 scripts/parse_takeout_maps.py <archive>.zip
 ```
 This merges every List CSV + the saved-places GeoJSON into one normalized list:
@@ -106,7 +130,7 @@ Procedure for a location-scoped request:
 3. **Resolve** that candidate set via the Places search tool, **location-biased to
    the target area**, to attach `lat`/`lng` (and rating/cuisine/price for free).
 4. **Keep** the ones that fall inside the area; merge with step 1.
-5. **Cache** every newly-resolved `lat`/`lng` back into `references/saved_places.json`
+5. **Cache** every newly-resolved `lat`/`lng` back into `DATA/saved_places.json`
    so each place is looked up at most once — the snapshot self-completes over time.
 
 If, after enrichment, few/no saved places match (common when travelling), say so
@@ -164,17 +188,20 @@ Adapt the body to the ask:
 
 ---
 
-## references/
+## Data files (in `DATA`, not in this folder)
 
 - `saved_places.json` — cached normalized snapshot (rebuilt when a newer export
-  lands). **Personal data — git-ignored; never commit.**
+  lands). **Personal data — never commit.**
 - `known_ids.md` — optional local cache of the Drive `Takeout` folder id.
-  **Personal data — git-ignored; never commit.** See `*.example` templates.
+  **Personal data — never commit.**
+
+`references/` in this folder holds only the `*.example` templates showing each
+file's shape with dummy data.
 
 ## Script reference — `scripts/parse_takeout_maps.py`
 
 | Flag | Description |
 |---|---|
 | `folder` (positional) | A Takeout `.zip`, a folder of zips, or an extracted folder; searched recursively, zips auto-extracted |
-| `--out PATH` | Write normalized JSON (else stdout); prints a per-list count summary |
+| `--out PATH` | Write normalized JSON (else stdout), creating parent folders and expanding `~`; prints a per-list count summary |
 | `--dedupe` | Merge records of the same venue — same Google place ID, same maps URL, or same name within 50 m. Keeps every list in `source_lists`, the first coordinates/address found, and all distinct notes. Same-name venues in different places stay separate. |
