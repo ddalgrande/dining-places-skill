@@ -13,9 +13,12 @@ reading `SKILL.md` and following it. The `name:` / `description:` frontmatter in
 ## How to use it, by agent capability
 
 - **Your agent supports skills** (Claude Code, Codex, Cursor, Gemini CLI, …):
-  install the skill folder where your agent discovers skills. See `README.md`
-  → *Install*. After that, nothing is invoked by hand — the agent loads
-  `SKILL.md` automatically when the user asks about eating out.
+  install with the [skills.sh](https://skills.sh) CLI —
+  `npx skills add ddalgrande/dining-places-skill -g` — which places the
+  `dining-places` folder where each detected agent discovers skills (or clone it
+  there by hand; see `README.md` → *Install*). After that, nothing is invoked by
+  hand — the agent loads `SKILL.md` automatically when the user asks about
+  eating out.
 
 - **Your agent has no skills mechanism** (Kimi CLI, many Claude Code-compatible
   clients, plain chat assistants): treat `SKILL.md` as a standing instruction
