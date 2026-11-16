@@ -76,13 +76,31 @@ The CLI detects your agents and installs the skill as **`dining-places`**
 | Gemini CLI | `.agents/skills/dining-places/` | `~/.gemini/skills/dining-places/` |
 | OpenCode | `.agents/skills/dining-places/` | `~/.config/opencode/skills/dining-places/` |
 
-Keep it current or remove it later:
+Keep it current or remove it later (drop `-g` if you installed per project):
 
 ```bash
-npx skills check                 # any updates available?
-npx skills update dining-places  # pull the latest
-npx skills remove dining-places
+npx skills check                    # any updates available?
+npx skills update dining-places -g  # pull the latest — back up your data first (below)
+npx skills remove dining-places -g
 ```
+
+> **Updating wipes your knowledge base.** `skills update` (and re-running
+> `skills add`) deletes the installed `dining-places/` folder before copying the
+> new version, so your generated `references/saved_places.json` — including
+> coordinates cached during enrichment — and `references/known_ids.md` go with
+> it. Copy them out first and restore them afterwards, e.g. for a global Claude
+> Code install:
+>
+> ```bash
+> SKILL=~/.claude/skills/dining-places   # your agent's path from the table above
+> mkdir -p ~/dining-places-backup
+> cp "$SKILL"/references/saved_places.json "$SKILL"/references/known_ids.md ~/dining-places-backup/ 2>/dev/null
+> npx skills update dining-places -g
+> cp ~/dining-places-backup/* "$SKILL"/references/
+> ```
+>
+> If you forget, the export is still in Takeout — re-running the parser rebuilds
+> `saved_places.json`, but enrichment caches are lost.
 
 Then restart your agent (in Claude Code, run `/skills` to confirm it loaded).
 
