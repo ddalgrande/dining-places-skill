@@ -13,7 +13,7 @@ present. Cuisine / rating / opening hours are NOT in Takeout — enrich those
 at advice-time with the places_search tool.
 
 Usage:
-    python3 parse_takeout_maps.py <folder> [--out saved_places.json] [--dedupe]
+    python3 parse_takeout_maps.py <folder> [--out ~/.dining-places/saved_places.json] [--dedupe]
 
 <folder> = path to the extracted Takeout export, or any folder that
 contains the .csv / .json export files (it searches recursively).
@@ -248,7 +248,9 @@ def main():
     ap.add_argument("folder",
                     help="A Takeout .zip, a folder of zips (My Drive/Takeout), "
                          "or an already-extracted folder (searched recursively)")
-    ap.add_argument("--out", help="Write normalized JSON here (default: stdout)")
+    ap.add_argument("--out", help="Write normalized JSON here, creating parent "
+                                  "folders as needed (default: stdout). "
+                                  "Recommended: ~/.dining-places/saved_places.json")
     ap.add_argument("--dedupe", action="store_true",
                     help="Merge records of the same venue (same place ID, URL, or "
                          "name within 50 m); keeps every source list")
@@ -277,12 +279,14 @@ def main():
 
     blob = json.dumps(places, ensure_ascii=False, indent=2)
     if args.out:
-        Path(args.out).write_text(blob, encoding="utf-8")
+        out = Path(args.out).expanduser()
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(blob, encoding="utf-8")
         by_list: dict[str, int] = {}
         for p in places:
             for lst in p["source_lists"]:
                 by_list[lst] = by_list.get(lst, 0) + 1
-        print(f"Parsed {len(places)} places across {len(by_list)} lists -> {args.out}")
+        print(f"Parsed {len(places)} places across {len(by_list)} lists -> {out}")
         for k, v in sorted(by_list.items(), key=lambda x: -x[1]):
             print(f"  {v:4d}  {k}")
     else:

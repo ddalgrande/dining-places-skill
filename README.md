@@ -84,23 +84,12 @@ npx skills update dining-places -g  # pull the latest — back up your data firs
 npx skills remove dining-places -g
 ```
 
-> **Updating wipes your knowledge base.** `skills update` (and re-running
-> `skills add`) deletes the installed `dining-places/` folder before copying the
-> new version, so your generated `references/saved_places.json` — including
-> coordinates cached during enrichment — and `references/known_ids.md` go with
-> it. Copy them out first and restore them afterwards, e.g. for a global Claude
-> Code install:
->
-> ```bash
-> SKILL=~/.claude/skills/dining-places   # your agent's path from the table above
-> mkdir -p ~/dining-places-backup
-> cp "$SKILL"/references/saved_places.json "$SKILL"/references/known_ids.md ~/dining-places-backup/ 2>/dev/null
-> npx skills update dining-places -g
-> cp ~/dining-places-backup/* "$SKILL"/references/
-> ```
->
-> If you forget, the export is still in Takeout — re-running the parser rebuilds
-> `saved_places.json`, but enrichment caches are lost.
+> **Your data survives updates.** `skills update` replaces the installed
+> `dining-places/` folder, so the skill keeps your knowledge base outside it, in
+> `~/.dining-places/` (override with `DINING_PLACES_HOME`). If an older install
+> left `saved_places.json` or `known_ids.md` under the skill's `references/`
+> folder, the agent copies them to `~/.dining-places/` on first use. Run the
+> update after that has happened.
 
 Then restart your agent (in Claude Code, run `/skills` to confirm it loaded).
 
@@ -178,7 +167,7 @@ places?"* or *"somewhere for drinks around here."* The agent does the parsing
 and enrichment.
 
 Behind the scenes the agent then: reads the export → runs
-`scripts/parse_takeout_maps.py` to build `references/saved_places.json` → matches
+`scripts/parse_takeout_maps.py` to build `~/.dining-places/saved_places.json` → matches
 your saved places to the area → enriches + widens → replies with a **map**, a
 **comparison table**, and a **booking link** per place.
 
@@ -205,8 +194,10 @@ gets **cheaper every time you use it**.
 
 ## Privacy
 
-This repo ships **no personal data**. Your generated `references/saved_places.json`
-and your real `references/known_ids.md` are **git-ignored** — do not commit them.
+This repo ships **no personal data**. Your generated `saved_places.json` and
+`known_ids.md` live in `~/.dining-places/`, outside the repo and the installed
+skill folder. Don't copy them into the repo; the legacy `references/` paths stay
+git-ignored as a safety net.
 They contain your saved restaurants and (potentially) home-adjacent locations.
 The `*.example` files show the shape with dummy data.
 

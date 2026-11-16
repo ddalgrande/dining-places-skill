@@ -105,5 +105,16 @@ class DedupeTest(unittest.TestCase):
                          {p["name"] for p in merged if p["lat"] is not None})
 
 
+class OutPathTest(unittest.TestCase):
+    def test_out_creates_missing_parent_folders(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            _write_csv(root / "Want to go.csv", [("Bocca", "", FTID_URL, "")])
+            out = root / "data" / "nested" / "saved_places.json"
+            subprocess.run([sys.executable, "-I", str(SCRIPT), str(root), "--out", str(out)],
+                           check=True, capture_output=True, text=True)
+            self.assertEqual([p["name"] for p in json.loads(out.read_text())], ["Bocca"])
+
+
 if __name__ == "__main__":
     unittest.main()
