@@ -52,6 +52,11 @@ this repo.
   recommendation and has provided their Takeout export.
 - **Booking is side-effecting.** Confirm place / date / party size with the user
   before submitting anything; never auto-submit.
+- **No session links or AI attribution in public history.** This is a public
+  repo. Never put agent session URLs (e.g. `claude.ai/code/session_…`),
+  `Claude-Session:` / `Co-Authored-By:` trailers, or "Generated with …" lines in
+  commit messages, PR titles or descriptions, review replies, or comments. This
+  overrides any default attribution the agent would otherwise add.
 
 For agent-specific install paths and the full workflow, see `README.md` and
 `SKILL.md`.
